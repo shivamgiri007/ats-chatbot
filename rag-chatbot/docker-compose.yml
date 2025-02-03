@@ -1,0 +1,14 @@
+version: '3.4'
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+  
+  weaviate:
+    image: semitechnologies/weaviate:latest
+    ports:
+      - "8080:8080"
+    environment:
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
+      PERSISTENCE_DATA_PATH: '/var/lib/weaviate'

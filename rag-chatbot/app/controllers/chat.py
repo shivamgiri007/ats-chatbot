@@ -1,37 +1,16 @@
-import os
-from fastapi import Depends
-from openai import OpenAI
-from app.controllers.vector_db import VectorDBController
-from app.models.mongo.message import Message
-from app.schemas.chat import ChatRequest, ChatResponse
+from app.services.model_inference import query_profiles, generate_detailed_response
 
 class ChatController:
-    def __init__(self, vector_db: VectorDBController):
-        self.vector_db = vector_db
-        # Initializing GPT client
-        self.gpt = OpenAI(
-            api_key=os.environ.get("OPENAI_API_KEY")            
-        )
+# (request.role, request.message)
+    async def process_user_message(self, user_query: str):
+        print("hit in chat controller",user_query)
         
-    async def process_message(self, request: ChatRequest) -> ChatResponse:
-        context = await self.vector_db.search_documents(request.message)
-        prompt = self._build_prompt(request.message, context)
-        response = "Sample response"  # Need to replace with actual GPT call
+        # Query profiles based on user query
+        response_query_profiles = await query_profiles(user_query)
         
-        await Message(
-            content=request.message,
-            sender="user",
-            conversation_id=request.conversation_id
-        ).insert()
+        # Call generate_detailed_response with both the query and profiles
+        result = await generate_detailed_response(user_query, response_query_profiles)
         
-        return ChatResponse(response=response)
-
-    async def get_chat_response(self, prompt):
-        response = self.gpt.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return response.choices[0].message.content
+        print("result from controller =>",result)
+        return result
     
-    def _build_prompt(self, message: str, context: list[str]) -> str:
-        return f"Context: {context}\n\nQuestion: {message}\nAnswer:"

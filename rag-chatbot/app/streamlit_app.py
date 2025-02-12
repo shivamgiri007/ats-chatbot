@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 
 # FastAPI backend URL
-BASE_URL = "ats-chatbot-api.up.railway.app"
+BASE_URL = "https://ats-chatbot-api.up.railway.app"
 
 # Function to register a new user
 def register_user(user_id, user_name, user_password):
